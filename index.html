@@ -69,7 +69,7 @@
             }
 
             // Hiển thị thông báo ngay lập tức
-            alert(`Cảm ơn bạn đã chọn "${reaction}" cho tiết mục ${selectedItemId}. Đang gửi dữ liệu...`);
+            alert(`Cảm ơn bạn đã bình chọn "${reaction}" cho tiết mục ${selectedItemId}. Đang gửi dữ liệu...`);
 
             fetch(`https://script.google.com/macros/s/AKfycbx6LHHzWO2WoagHvazvIJs8fAph2f35Q4N_8jDSi0-YTsGNcE152SZ15Jj17M6KBAYO/exec?vote=${selectedItemId}&reaction=${reaction}&user=${userId}`)
                 .then(response => response.json())
