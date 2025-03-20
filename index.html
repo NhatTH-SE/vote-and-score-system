@@ -16,16 +16,21 @@
         <button class="vote-btn" onclick="vote(2)">Tiết mục 2</button>
         <button class="vote-btn" onclick="vote(3)">Tiết mục 3</button>
     </div>
+    
     <script>
         function vote(itemId) {
-            fetch('vote.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ item: itemId })
+            fetch('https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbzMScF1KSHI3364toL6cMXou_NWJk-c7577YQbRBZhlg22nH2Uo7gtXFtPtPn9Kjbgj/exec/exec?vote=' + itemId, {
+                method: 'GET'
             })
             .then(response => response.json())
-            .then(data => alert(data.message))
-            .catch(error => console.error('Lỗi:', error));
+            .then(data => {
+                if (data.success) {
+                    alert("Bình chọn thành công!");
+                } else {
+                    alert("Lỗi khi bình chọn!");
+                }
+            })
+            .catch(error => console.error("Lỗi:", error));
         }
     </script>
 </body>
