@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bình chọn tiết mục</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .vote-btn { padding: 10px 20px; margin: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Bình chọn cho tiết mục yêu thích!</h1>
+    <div id="vote-container">
+        <button class="vote-btn" onclick="vote(1)">Tiết mục 1</button>
+        <button class="vote-btn" onclick="vote(2)">Tiết mục 2</button>
+        <button class="vote-btn" onclick="vote(3)">Tiết mục 3</button>
+    </div>
+    <script>
+        function vote(itemId) {
+            fetch('vote.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item: itemId })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message))
+            .catch(error => console.error('Lỗi:', error));
+        }
+    </script>
+</body>
+</html>
