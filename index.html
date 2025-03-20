@@ -1,17 +1,43 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bình chọn tiết mục</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .vote-btn, .reaction-btn { padding: 10px 20px; margin: 10px; cursor: pointer; border: none; font-size: 16px; }
-        .like-btn { background-color:  #ff3b30; color: white; } /* Màu xanh cho Thích */
-        .dislike-btn { background-color: #607d8b; color: white; } /* Màu đỏ cho Không thích */
-        .hidden { display: none; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .vote-btn,
+        .reaction-btn {
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+
+        .like-btn {
+            background-color: #ff3b30;
+            color: white;
+        }
+
+        /* Màu xanh cho Thích */
+        .dislike-btn {
+            background-color: #607d8b;
+            color: white;
+        }
+
+        /* Màu đỏ cho Không thích */
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
+
 <body>
     <h1>Bình chọn cho tiết mục yêu thích!</h1>
     <div id="vote-container">
@@ -19,7 +45,7 @@
         <button class="vote-btn" onclick="openVoteDialog(2, 'Tiết mục 2')">Tiết mục 2</button>
         <button class="vote-btn" onclick="openVoteDialog(3, 'Tiết mục 3')">Tiết mục 3</button>
     </div>
-    
+
     <div id="vote-dialog" class="hidden">
         <h2>Bạn cảm thấy về <span id="item-name"></span> như thế nào?</h2>
         <button class="reaction-btn like-btn" onclick="submitVote('like')"> Thích</button>
@@ -28,39 +54,37 @@
 
     <script>
         let selectedItemId = null;
-        
+
         function openVoteDialog(itemId, itemName) {
             selectedItemId = itemId;
             document.getElementById("item-name").innerText = itemName;
             document.getElementById("vote-dialog").classList.remove("hidden");
         }
         function submitVote(reaction) {
-    let userId = localStorage.getItem("userId");
+            let userId = localStorage.getItem("userId");
 
-    if (!userId) {
-        userId = "user_" + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem("userId", userId);
-    }
-
-    // Hiển thị thông báo ngay lập tức
-    alert(`Cảm ơn bạn đã chọn "${reactibbn}" cho tiết mục ${selectedItemId}. Đang gửi dữ liệu...`);
-
-    fetch(`https://script.google.com/macros/s/AKfycbyax3VEgJ5ApGuYZ2Iy8RJmQVS8288DvRGlcOKDADwX1X-xx4X72vmcAIG3Vd6OF4Ie/exec?vote=${selectedItemId}&reaction=${reaction}&user=${userId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (!data.success) {
-                alert(`⚠️ Lỗi: ${data.error}`);
+            if (!userId) {
+                userId = "user_" + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem("userId", userId);
             }
-        })
-        .catch(error => {
-            alert("❌ Có lỗi khi gửi dữ liệu. Vui lòng thử lại!");
-        });
 
-    document.getElementById("vote-dialog").classList.add("hidden");
-}
+            // Hiển thị thông báo ngay lập tức
+            alert(`Cảm ơn bạn đã chọn "${reaction}" cho tiết mục ${selectedItemId}. Đang gửi dữ liệu...`);
 
+            fetch(`https://script.google.com/macros/s/AKfycbx6LHHzWO2WoagHvazvIJs8fAph2f35Q4N_8jDSi0-YTsGNcE152SZ15Jj17M6KBAYO/exec?vote=${selectedItemId}&reaction=${reaction}&user=${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert(`⚠️ Lỗi: ${data.error}`);
+                    }
+                })
+                .catch(error => {
+                    alert("❌ Có lỗi khi gửi dữ liệu. Vui lòng thử lại!");
+                });
 
-        
+            document.getElementById("vote-dialog").classList.add("hidden");
+        }
     </script>
 </body>
+
 </html>
