@@ -19,7 +19,7 @@
     
     <script>
         function vote(itemId) {
-            fetch('https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbzMScF1KSHI3364toL6cMXou_NWJk-c7577YQbRBZhlg22nH2Uo7gtXFtPtPn9Kjbgj/exec/exec?vote=' + itemId, {
+            fetch('https://script.google.com/macros/s/AKfycbzMScF1KSHI3364toL6cMXou_NWJk-c7577YQbRBZhlg22nH2Uo7gtXFtPtPn9Kjbgj/exec?vote=' + itemId, {
                 method: 'GET'
             })
             .then(response => response.json())
