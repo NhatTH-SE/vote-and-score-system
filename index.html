@@ -12,26 +12,53 @@
 <body>
     <h1>Bình chọn cho tiết mục yêu thích!</h1>
     <div id="vote-container">
-        <button class="vote-btn" onclick="vote(1)">Tiết mục 1</button>
-        <button class="vote-btn" onclick="vote(2)">Tiết mục 2</button>
-        <button class="vote-btn" onclick="vote(3)">Tiết mục 3</button>
+        <button class="vote-btn" onclick="openVoteDialog(1)">Tiết mục 1</button>
+        <button class="vote-btn" onclick="openVoteDialog(2)">Tiết mục 2</button>
+        <button class="vote-btn" onclick="openVoteDialog(3)">Tiết mục 3</button>
+    </div>
+    
+    <div id="vote-dialog" style="display:none;">
+        <h2>Chọn số điểm</h2>
+        <select id="score">
+            <option value="1">1 điểm</option>
+            <option value="2">2 điểm</option>
+            <option value="3">3 điểm</option>
+        </select>
+        <button onclick="submitVote()">Gửi bình chọn</button>
     </div>
     
     <script>
-        function vote(itemId) {
-            fetch('https://script.google.com/macros/s/AKfycbySW9ehJGEbbscJkjAzmYrC_mOINlxoIx7-ASG40TycVtuVuJ-22Mun8AsdGP2V-iik/exec?vote=' + itemId, {
-                method: 'GET'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Bình chọn thành công!");
-                } else {
-                    alert("Lỗi khi bình chọn!");
-                }
-            })
-            .catch(error => console.error("Lỗi:", error));
+        let selectedItemId = null;
+        
+        function openVoteDialog(itemId) {
+            selectedItemId = itemId;
+            document.getElementById("vote-dialog").style.display = "block";
         }
+        
+        function submitVote() {
+    let score = document.getElementById("score").value;
+    let userId = localStorage.getItem("userId");
+    
+    if (!userId) {
+        userId = "user_" + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem("userId", userId);
+    }
+
+    fetch(`https://script.google.com/macros/s/AKfycbyLEhYJ2h-Po-cu2kgMyQ3f8o0hyeCm6d6K5MZ0wqOxQNjyDa6Bza7U0vdMnt9e0KEY/exec?vote=${selectedItemId}&score=${score}&user=${userId}`, {
+        method: 'GET'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Bình chọn thành công!");
+        } else {
+            alert(data.error);
+        }
+        document.getElementById("vote-dialog").style.display = "none";
+    })
+    .catch(error => console.error("Lỗi:", error));
+}
+
     </script>
 </body>
 </html>
