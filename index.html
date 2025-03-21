@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,82 +8,176 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
         }
-
-        .vote-btn,
-        .reaction-btn {
+        h1 {
+            color: #333;
+        }
+        .vote-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        .vote-btn {
             padding: 10px 20px;
-            margin: 10px;
             cursor: pointer;
             border: none;
             font-size: 16px;
-        }
-
-        .like-btn {
-            background-color: #ff3b30;
+            background-color: #ff9800;
             color: white;
+            border-radius: 5px;
+            transition: 0.3s;
         }
-
-        /* Màu xanh cho Thích */
-        .dislike-btn {
-            background-color: #607d8b;
-            color: white;
+        .vote-btn:hover {
+            background-color: #e68900;
         }
-
-        /* Màu đỏ cho Không thích */
         .hidden {
             display: none;
         }
+        .vote-dialog {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            margin-top: 20px;
+            position: relative;
+        }
+        .reaction-btn {
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .like-btn {
+            background-color: #4caf50;
+            color: white;
+        }
+        .dislike-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .loading {
+            display: none;
+            font-size: 14px;
+            color: #555;
+            margin-top: 10px;
+        }
     </style>
 </head>
-
 <body>
     <h1>Bình chọn cho tiết mục yêu thích!</h1>
-    <div id="vote-container">
-        <button class="vote-btn" onclick="openVoteDialog(1, 'Tiết mục 1')">Tiết mục 1</button>
-        <button class="vote-btn" onclick="openVoteDialog(2, 'Tiết mục 2')">Tiết mục 2</button>
-        <button class="vote-btn" onclick="openVoteDialog(3, 'Tiết mục 3')">Tiết mục 3</button>
-    </div>
+    <div class="vote-container" id="vote-container"></div>
 
-    <div id="vote-dialog" class="hidden">
+    <div id="vote-dialog" class="vote-dialog hidden">
         <h2>Bạn cảm thấy về <span id="item-name"></span> như thế nào?</h2>
-        <button class="reaction-btn like-btn" onclick="submitVote('like')"> Thích</button>
+        <button class="reaction-btn like-btn" onclick="submitVote('like')">Thích</button>
         <button class="reaction-btn dislike-btn" onclick="submitVote('dislike')">Không thích</button>
+        <p id="loading-text" class="loading">Đang gửi bình chọn...</p>
     </div>
 
     <script>
+        const performances = [
+            { id: 1, name: "Cho em gần anh thêm chút nữa" },
+            { id: 2, name: "Cuối Cùng Thì" },
+            { id: 3, name: "Lạc đường" },
+            { id: 4, name: "Chưa bao giờ" },
+            { id: 5, name: "Vó ngựa trên đồi cỏ non" },
+            { id: 6, name: "Có không giữ mất đừng tìm" },
+            { id: 7, name: "Hà Giang Ơi" },
+            { id: 8, name: "Màu nước mắt" },
+            { id: 9, name: "Hoa nở không màu" },
+            { id: 10, name: "Áo mới Cà Mau" },
+            { id: 11, name: "Giá như cô ấy chưa xuất hiện" },
+            { id: 12, name: "40 độ. Padory" },
+            { id: 13, name: "FEARLESS (KHÔNG SỢ HÃI)"},
+            { id: 14, name: "Ước gì"},
+            { id: 15, name: "Bác đang cùng chúng cháu hành quân"},
+            { id: 16, name: "Dẫu có lỗi lầm"},
+            { id: 17, name: "Tại vì sao"},
+            { id: 18, name: "Như một người dưng"},
+            { id: 19, name: "Nàng Kiều lỡ bước"},
+        ];
+
         let selectedItemId = null;
+
+        function renderButtons() {
+            const container = document.getElementById("vote-container");
+            performances.forEach(perf => {
+                const button = document.createElement("button");
+                button.classList.add("vote-btn");
+                button.textContent = perf.name;
+                button.onclick = () => openVoteDialog(perf.id, perf.name);
+                container.appendChild(button);
+            });
+        }
 
         function openVoteDialog(itemId, itemName) {
             selectedItemId = itemId;
             document.getElementById("item-name").innerText = itemName;
             document.getElementById("vote-dialog").classList.remove("hidden");
         }
+
         function submitVote(reaction) {
             let userId = localStorage.getItem("userId");
-
             if (!userId) {
                 userId = "user_" + Math.random().toString(36).substr(2, 9);
                 localStorage.setItem("userId", userId);
             }
 
-            // Hiển thị thông báo ngay lập tức
-            alert(`Cảm ơn bạn đã bình chọn "${reaction}" cho tiết mục ${selectedItemId}. Đang gửi dữ liệu...`);
+            const loadingText = document.getElementById("loading-text");
+            loadingText.style.display = "block"; // Hiện loading
 
             fetch(`https://script.google.com/macros/s/AKfycbx6LHHzWO2WoagHvazvIJs8fAph2f35Q4N_8jDSi0-YTsGNcE152SZ15Jj17M6KBAYO/exec?vote=${selectedItemId}&reaction=${reaction}&user=${userId}`)
                 .then(response => response.json())
                 .then(data => {
-                    if (!data.success) {
-                        alert(`⚠️ Lỗi: ${data.error}`);
+                    loadingText.style.display = "none"; // Ẩn loading
+                    if (data.success) {
+                        showMessage(`✅ Bình chọn "${reaction}" cho tiết mục "${performances.find(p => p.id === selectedItemId).name}" thành công!`);
+                    } else {
+                        showMessage(`⚠️ Lỗi: ${data.error}`, true);
                     }
                 })
-                .catch(error => {
-                    alert("❌ Có lỗi khi gửi dữ liệu. Vui lòng thử lại!");
+                .catch(() => {
+                    loadingText.style.display = "none"; // Ẩn loading
+                    showMessage("❌ Có lỗi khi gửi dữ liệu. Vui lòng thử lại!", true);
                 });
 
-            document.getElementById("vote-dialog").classList.add("hidden");
+            setTimeout(() => {
+                document.getElementById("vote-dialog").classList.add("hidden");
+            }, 1000);
         }
+
+        function showMessage(message, isError = false) {
+            const msgBox = document.createElement("div");
+            msgBox.textContent = message;
+            msgBox.style.position = "fixed";
+            msgBox.style.bottom = "20px";
+            msgBox.style.left = "50%";
+            msgBox.style.transform = "translateX(-50%)";
+            msgBox.style.padding = "10px 20px";
+            msgBox.style.background = isError ? "#f44336" : "#4caf50";
+            msgBox.style.color = "white";
+            msgBox.style.borderRadius = "5px";
+            msgBox.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.3)";
+            msgBox.style.opacity = "1";
+            msgBox.style.transition = "opacity 0.5s ease";
+
+            document.body.appendChild(msgBox);
+
+            setTimeout(() => {
+                msgBox.style.opacity = "0";
+                setTimeout(() => document.body.removeChild(msgBox), 500);
+            }, 2500);
+        }
+
+        renderButtons();
     </script>
 </body>
-
 </html>
