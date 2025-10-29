@@ -1,183 +1,44 @@
 <!DOCTYPE html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="assets/style.css" />
     <title>Bình chọn tiết mục</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-        h1 {
-            color: #333;
-        }
-        .vote-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            max-width: 800px;
-            margin: 20px auto;
-        }
-        .vote-btn {
-            padding: 10px 20px;
-            cursor: pointer;
-            border: none;
-            font-size: 16px;
-            background-color: #ff9800;
-            color: white;
-            border-radius: 5px;
-            transition: 0.3s;
-        }
-        .vote-btn:hover {
-            background-color: #e68900;
-        }
-        .hidden {
-            display: none;
-        }
-        .vote-dialog {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: inline-block;
-            margin-top: 20px;
-            position: relative;
-        }
-        .reaction-btn {
-            padding: 10px 15px;
-            margin: 5px;
-            cursor: pointer;
-            border: none;
-            font-size: 16px;
-            border-radius: 5px;
-        }
-        .like-btn {
-            background-color: #4caf50;
-            color: white;
-        }
-        .dislike-btn {
-            background-color: #f44336;
-            color: white;
-        }
-        .loading {
-            display: none;
-            font-size: 14px;
-            color: #555;
-            margin-top: 10px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Bình chọn cho tiết mục yêu thích!</h1>
-    <div class="vote-container" id="vote-container"></div>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🎭 Bình chọn tiết mục</h1>
+        <p class="subtitle">Chọn tiết mục yêu thích của bạn và gửi phản hồi!</p>
+      </header>
 
-    <div id="vote-dialog" class="vote-dialog hidden">
-        <h2>Bạn cảm thấy về <span id="item-name"></span> như thế nào?</h2>
-        <button class="reaction-btn like-btn" onclick="submitVote('like')">Thích</button>
-        <button class="reaction-btn dislike-btn" onclick="submitVote('dislike')">Không thích</button>
-        <p id="loading-text" class="loading">Đang gửi bình chọn...</p>
+      <div class="vote-container" id="vote-container"></div>
     </div>
 
-    <script>
-        const performances = [
-            { id: 1, name: "Cho em gần anh thêm chút nữa" },
-            { id: 2, name: "Cuối Cùng Thì" },
-            { id: 3, name: "Lạc đường" },
-            { id: 4, name: "Chưa bao giờ" },
-            { id: 5, name: "Vó ngựa trên đồi cỏ non" },
-            { id: 6, name: "Có không giữ mất đừng tìm" },
-            { id: 7, name: "Hà Giang Ơi" },
-            { id: 8, name: "Màu nước mắt" },
-            { id: 9, name: "Hoa nở không màu" },
-            { id: 10, name: "Áo mới Cà Mau" },
-            { id: 11, name: "Giá như cô ấy chưa xuất hiện" },
-            { id: 12, name: "40 độ. Padory" },
-            { id: 13, name: "FEARLESS (KHÔNG SỢ HÃI)"},
-            { id: 14, name: "Ước gì"},
-            { id: 15, name: "Bác đang cùng chúng cháu hành quân"},
-            { id: 16, name: "Dẫu có lỗi lầm"},
-            { id: 17, name: "Tại vì sao"},
-            { id: 18, name: "Như một người dưng"},
-            { id: 19, name: "Nàng Kiều lỡ bước"},
-        ];
+    <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
+      <div class="vote-dialog" onclick="event.stopPropagation()">
+        <h2>Bạn cảm thấy thế nào về</h2>
+        <span class="item-name-highlight" id="item-name"></span>
 
-        let selectedItemId = null;
+        <div class="reaction-buttons">
+          <button class="reaction-btn like-btn" onclick="submitVote('like')">
+            <span>👍</span>
+            <span>Thích</span>
+          </button>
+          <button
+            class="reaction-btn dislike-btn"
+            onclick="submitVote('dislike')"
+          >
+            <span>👎</span>
+            <span>Không thích</span>
+          </button>
+        </div>
 
-        function renderButtons() {
-            const container = document.getElementById("vote-container");
-            performances.forEach(perf => {
-                const button = document.createElement("button");
-                button.classList.add("vote-btn");
-                button.textContent = perf.name;
-                button.onclick = () => openVoteDialog(perf.id, perf.name);
-                container.appendChild(button);
-            });
-        }
+        <p id="loading-text" class="loading">Đang gửi bình chọn...</p>
+      </div>
+    </div>
 
-        function openVoteDialog(itemId, itemName) {
-            selectedItemId = itemId;
-            document.getElementById("item-name").innerText = itemName;
-            document.getElementById("vote-dialog").classList.remove("hidden");
-        }
-
-        function submitVote(reaction) {
-            let userId = localStorage.getItem("userId");
-            if (!userId) {
-                userId = "user_" + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem("userId", userId);
-            }
-
-            const loadingText = document.getElementById("loading-text");
-            loadingText.style.display = "block"; // Hiện loading
-
-            fetch(`https://script.google.com/macros/s/AKfycbx6LHHzWO2WoagHvazvIJs8fAph2f35Q4N_8jDSi0-YTsGNcE152SZ15Jj17M6KBAYO/exec?vote=${selectedItemId}&reaction=${reaction}&user=${userId}`)
-                .then(response => response.json())
-                .then(data => {
-                    loadingText.style.display = "none"; // Ẩn loading
-                    if (data.success) {
-                        showMessage(`✅ Bình chọn "${reaction}" cho tiết mục "${performances.find(p => p.id === selectedItemId).name}" thành công!`);
-                    } else {
-                        showMessage(`⚠️ Lỗi: ${data.error}`, true);
-                    }
-                })
-                .catch(() => {
-                    loadingText.style.display = "none"; 
-                    showMessage("❌ Có lỗi khi gửi dữ liệu. Vui lòng thử lại!", true);
-                });
-
-            setTimeout(() => {
-                document.getElementById("vote-dialog").classList.add("hidden");
-            }, 1000);
-        }
-
-        function showMessage(message, isError = false) {
-            const msgBox = document.createElement("div");
-            msgBox.textContent = message;
-            msgBox.style.position = "fixed";
-            msgBox.style.bottom = "20px";
-            msgBox.style.left = "50%";
-            msgBox.style.transform = "translateX(-50%)";
-            msgBox.style.padding = "10px 20px";
-            msgBox.style.background = isError ? "#f44336" : "#4caf50";
-            msgBox.style.color = "white";
-            msgBox.style.borderRadius = "5px";
-            msgBox.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.3)";
-            msgBox.style.opacity = "1";
-            msgBox.style.transition = "opacity 0.5s ease";
-
-            document.body.appendChild(msgBox);
-
-            setTimeout(() => {
-                msgBox.style.opacity = "0";
-                setTimeout(() => document.body.removeChild(msgBox), 500);
-            }, 2500);
-        }
-
-        renderButtons();
-    </script>
-</body>
+    <script src="assets/script.js"></script>
+  </body>
 </html>
