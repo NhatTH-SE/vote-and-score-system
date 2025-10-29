@@ -1,40 +1,60 @@
 let performances = [];
 let selectedItemId = null;
-
+let performanceMap = new Map();
 
 async function loadPerformances() {
     const url = "https://script.google.com/macros/s/AKfycbxK5AP_UFqK2ffBt49dB7ApTN38Qy-7nWpIPIshRIu9Qe3EOrMzUYeda--q1j2sU6V-/exec";
     try {
         const res = await fetch(url);
         const data = await res.json();
+
         if (data.success && data.performances) {
-            performances = data.performances;
-            renderButtons();
+            const container = document.getElementById("vote-container");
+
+            const newIds = new Set(data.performances.map(p => p.id));
+            const oldIds = new Set(performances.map(p => p.id));
+
+
+            data.performances.forEach(perf => {
+                if (!performanceMap.has(perf.id)) {
+                    performances.push(perf);
+                    const card = createCard(perf);
+                    container.appendChild(card);
+                    performanceMap.set(perf.id, card);
+                }
+            });
+
+
+            oldIds.forEach(id => {
+                if (!newIds.has(id)) {
+                    const card = performanceMap.get(id);
+                    if (card) {
+                        card.remove();
+                        performanceMap.delete(id);
+                        performances = performances.filter(p => p.id !== id);
+                    }
+                }
+            });
+
         } else {
-            alert("Lỗi khi tải danh sách bài hát!");
+            console.warn("Không có dữ liệu bài hát mới");
         }
     } catch (err) {
         console.error(err);
-        alert("Lỗi khi kết nối server!");
     }
 }
 
-function renderButtons() {
-    const container = document.getElementById("vote-container");
-    container.innerHTML = "";
-    performances.forEach((perf, index) => {
-        const card = document.createElement("div");
-        card.classList.add("vote-card");
-        card.style.animationDelay = `${index * 0.05}s`;
-        card.onclick = () => openVoteDialog(perf.id, perf.name);
+function createCard(perf) {
+    const card = document.createElement("div");
+    card.classList.add("vote-card");
+    card.onclick = () => openVoteDialog(perf.id, perf.name);
 
-        card.innerHTML = `
-            <div class="card-number">${perf.id}</div>
-            <div class="card-title">${perf.name}</div>
-            <div class="vote-icon">→ Bình chọn</div>
-        `;
-        container.appendChild(card);
-    });
+    card.innerHTML = `
+        <div class="card-number">${perf.id}</div>
+        <div class="card-title">${perf.name}</div>
+        <div class="vote-icon">→ Bình chọn</div>
+    `;
+    return card;
 }
 
 function openVoteDialog(itemId, itemName) {
@@ -95,4 +115,7 @@ function showToast(message, type) {
     }, 3000);
 }
 
-document.addEventListener("DOMContentLoaded", loadPerformances);
+document.addEventListener("DOMContentLoaded", () => {
+    loadPerformances();
+    setInterval(loadPerformances, 15000);
+});
